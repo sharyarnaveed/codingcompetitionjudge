@@ -1,84 +1,50 @@
 # 🚀 CodeClash Judge
 
 <p align="center">
-  <strong>A secure, scalable, and Docker-based online code judging engine.</strong>
-  <br />
-  Built to execute, evaluate, and verify programming submissions in isolated environments with support for multiple test cases and automated verdict generation.
+  <h3 align="center">A Secure, Scalable & Docker-Based Online Code Judge</h3>
+
+  <p align="center">
+    CodeClash Judge is an online code execution engine that securely compiles,
+    executes, and evaluates programming submissions inside isolated Docker
+    containers with support for multiple test cases and detailed verdicts.
+  </p>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/Express.js-Backend-000000?logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/Redis-Queue-DC382D?logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/BullMQ-Worker-orange" />
-  <img src="https://img.shields.io/badge/Docker-Sandbox-2496ED?logo=docker&logoColor=white" />
-  <img src="https://img.shields.io/badge/Status-Under%20Development-yellow" />
+
+![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-Backend-000000?style=for-the-badge&logo=express)
+![Redis](https://img.shields.io/badge/Redis-Queue-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![BullMQ](https://img.shields.io/badge/BullMQ-Worker-orange?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Development-yellow?style=for-the-badge)
+
 </p>
 
 ---
 
 # 📖 Overview
 
-**CodeClash Judge** is the execution engine behind the **CodeClash** online programming platform.
+**CodeClash Judge** is the execution engine powering the **CodeClash** online programming platform.
 
-It securely compiles and executes user-submitted programs inside isolated Docker containers, evaluates them against multiple test cases, and returns accurate verdicts such as **Accepted**, **Wrong Answer**, **Compilation Error**, **Runtime Error**, and **Time Limit Exceeded**.
+It securely compiles and executes user submissions inside isolated Docker containers, evaluates them against multiple test cases, and returns accurate verdicts.
 
-The architecture follows a distributed worker model using **BullMQ** and **Redis**, making it scalable and easy to extend with additional languages and workers.
+The project follows a scalable architecture where the API, queue, and workers are separated, making it easy to scale horizontally as the platform grows.
 
 ---
 
 # ✨ Features
 
-- 🔒 Secure Docker-based code execution
-- ⚡ Queue-based asynchronous judging
-- 🧪 Multiple test case evaluation
-- ⏱ Time Limit Exceeded (TLE) detection
+- 🐳 Docker-based sandbox execution
+- ⚡ Queue-driven judging architecture
+- 🧪 Multiple test case support
+- ⏱ Time Limit Exceeded (TLE)
 - 📊 Detailed execution verdicts
-- 🧹 Automatic temporary file cleanup
+- 🔒 Secure isolated execution
+- 📁 Temporary workspace generation
+- 🧹 Automatic execution management
 - 🏗 Modular executor architecture
-- 📦 Separate worker process
-- 🚀 Easily scalable worker architecture
-- 🛡 Isolated execution environment
-
----
-
-# 🏗 System Architecture
-
-```text
-                    User
-                      │
-                      ▼
-              Express Backend API
-                      │
-                      ▼
-             Store Submission
-                      │
-                      ▼
-                 BullMQ Queue
-                      │
-                 Redis Broker
-                      │
-                      ▼
-               Judge Worker
-                      │
-          ┌───────────┴───────────┐
-          │                       │
-          ▼                       ▼
-    C++ Executor           Python Executor
-          │                       │
-          └───────────┬───────────┘
-                      ▼
-          Docker Container Runner
-                      │
-                      ▼
-            Execute Test Cases
-                      │
-                      ▼
-              Generate Verdict
-                      │
-                      ▼
-              Update Submission
-```
+- 🚀 Scalable worker design
 
 ---
 
@@ -92,154 +58,115 @@ The architecture follows a distributed worker model using **BullMQ** and **Redis
 | Message Broker | Redis |
 | Containerization | Docker |
 | Operating System | Linux |
-| Languages Supported | C++, Python |
 
 ---
 
-# 📂 Project Structure
+# 💻 Supported Languages
+
+| Language | Status |
+|----------|--------|
+| C++ | ✅ Supported |
+| Python | ✅ Supported |
+
+---
+
+# 🏗 Architecture
 
 ```text
-codeclash-judge/
-
-├── backend/
-│
-├── worker/
-│   ├── src/
-│   │
-│   ├── executors/
-│   │   ├── cpp/
-│   │   └── python/
-│   │
-│   ├── queue/
-│   │
-│   ├── docker/
-│   │
-│   ├── utils/
-│   │
-│   └── temp/
-│
-├── docker/
-│
-├── README.md
-│
-└── package.json
+                     User
+                       │
+                       ▼
+                Express Backend
+                       │
+                 Create Submission
+                       │
+                       ▼
+                  BullMQ Queue
+                       │
+                    Redis
+                       │
+                       ▼
+                Judge Worker
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+          ▼                         ▼
+     C++ Executor            Python Executor
+          │                         │
+          └────────────┬────────────┘
+                       ▼
+                Docker Container
+                       │
+                       ▼
+              Execute Test Cases
+                       │
+                       ▼
+                Generate Verdict
+                       │
+                       ▼
+                Return Response
 ```
 
 ---
 
-# ⚙️ How It Works
+# ⚙️ Judging Workflow
 
-## 1. User Submission
+## 1. Submission
 
-The backend receives:
+The backend receives
 
-- Source code
-- Programming language
+- Source Code
+- Programming Language
 - Problem ID
 
----
+↓
 
-## 2. Queue Submission
+## 2. Queue
 
-The submission is pushed into a BullMQ queue.
+The submission is pushed into the BullMQ queue.
 
-```text
-Submission
-      │
-      ▼
- BullMQ Queue
-```
+↓
 
----
+## 3. Worker
 
-## 3. Worker Processing
+A dedicated worker picks the submission from Redis.
 
-A dedicated worker continuously listens for incoming submissions.
+↓
 
-```text
-Queue
-   │
-   ▼
-Worker
-```
+## 4. Executor
 
----
+The appropriate executor is selected.
 
-## 4. Source File Generation
+Current executors
 
-The worker creates a temporary execution directory.
+- C++
+- Python
 
-Example:
+↓
 
-```text
-main.cpp
+## 5. Docker
 
-or
+Source code is compiled (if required) and executed inside a Docker container.
 
-main.py
-```
+↓
 
----
+## 6. Test Cases
 
-## 5. Docker Execution
+Each test case runs independently.
 
-The source code is executed inside an isolated Docker container.
+↓
 
-Benefits include:
+## 7. Verdict
 
-- Sandboxed execution
-- Security
-- Process isolation
-- Consistent runtime environment
+A final verdict is generated and returned.
 
 ---
 
-## 6. Test Case Evaluation
+# 🧪 Multiple Test Cases
 
-Each submission is executed independently for every test case.
+Each problem can contain any number of test cases.
 
-```text
-Test Case 1
-      │
-      ▼
- Execute
-      │
-      ▼
- Compare Output
-      │
-      ▼
-Test Case 2
-      │
-      ▼
- Execute
-      │
-      ▼
- Compare Output
-      │
-      ▼
-...
-      │
-      ▼
-Final Verdict
-```
-
----
-
-## 7. Result Generation
-
-The judge returns:
-
-- Final verdict
-- Execution time
-- Failed test case (if applicable)
-
----
-
-# 🧪 Multiple Test Case Support
-
-Every problem may contain multiple hidden or public test cases.
-
-Example:
+Example
 
 ```text
 Input 1
@@ -262,61 +189,25 @@ Input 3
 Expected Output 3
 ```
 
-Every test case is evaluated independently.
-
-If any test fails, execution stops immediately and the appropriate verdict is returned.
+Execution stops immediately if any test case fails.
 
 ---
 
 # ⏱ Time Limit Exceeded (TLE)
 
-Each program executes with a configurable timeout.
+Every execution has a configurable timeout.
 
-If execution exceeds the allowed time limit, the worker immediately terminates the process and returns:
+If a program exceeds the allowed execution time, the worker terminates the process and returns
 
 ```text
 Time Limit Exceeded
 ```
 
-This protects the judge against:
+This prevents
 
 - Infinite loops
-- Resource exhaustion
-- Malicious submissions
-
----
-
-# 🐳 Docker Sandbox
-
-Every submission is executed inside its own Docker container.
-
-Current benefits include:
-
-- Filesystem isolation
-- Process isolation
-- Consistent runtime
-- Automatic cleanup
-- Secure execution
-
----
-
-# 🔒 Security
-
-Current security mechanisms:
-
-- Docker isolation
-- Temporary execution workspace
-- Automatic cleanup
-- Execution timeout
-- Separate compilation and execution
-
-Planned improvements:
-
-- Memory limits
-- CPU limits
-- Read-only filesystem
-- Network isolation
-- Resource quotas
+- Resource abuse
+- Long-running processes
 
 ---
 
@@ -325,78 +216,144 @@ Planned improvements:
 | Verdict | Description |
 |----------|-------------|
 | ✅ Accepted | All test cases passed |
-| ❌ Wrong Answer | Output differs from expected result |
-| ⚠ Compilation Error | Source code failed to compile |
+| ❌ Wrong Answer | Output does not match expected output |
+| ⚠️ Compilation Error | Source code failed to compile |
 | 💥 Runtime Error | Program crashed during execution |
-| ⏱ Time Limit Exceeded | Execution exceeded the allowed time |
+| ⏱ Time Limit Exceeded | Program exceeded execution limit |
 
 ---
 
-# 💻 Supported Languages
+# 🔒 Security
 
-| Language | Compiler / Interpreter | Status |
-|----------|------------------------|--------|
-| C++ | g++ | ✅ Supported |
-| Python | Python 3 | ✅ Supported |
+Current security features
+
+- Docker container isolation
+- Separate compilation & execution
+- Temporary execution directories
+- Process timeout protection
+- Secure execution environment
+
+---
+
+# 📂 Project Structure
+
+```text
+codeclash-judge/
+
+├── backend/
+│
+├── worker/
+│   ├── src/
+│   │
+│   ├── executors/
+│   │   ├── cpp/
+│   │   └── python/
+│   │
+│   ├── queue/
+│   │
+│   ├── utils/
+│   │
+│   └── temp/
+│
+├── docker/
+│
+├── package.json
+│
+└── README.md
+```
 
 ---
 
 # 🚀 Current Progress
 
-## Completed
+## ✅ Completed
 
-- ✅ Docker execution environment
-- ✅ BullMQ worker
+- ✅ Docker-based sandbox execution
+- ✅ BullMQ Worker
 - ✅ Redis queue integration
-- ✅ C++ executor
-- ✅ Python executor
-- ✅ Multiple test case execution
-- ✅ Time Limit Exceeded detection
+- ✅ C++ Judge
+- ✅ Python Judge
+- ✅ Multiple Test Cases
 - ✅ Compilation handling
-- ✅ Temporary workspace creation
-- ✅ Automatic cleanup
-- ✅ Modular project structure
+- ✅ Runtime Error detection
+- ✅ Time Limit Exceeded (TLE)
+- ✅ Modular executor architecture
+- ✅ Temporary workspace generation
 
 ---
 
-## Currently Working On
+## 🚧 Upcoming Features
 
-- Backend API integration
-- Submission persistence
-- Database integration
-- Judge result storage
+- ⬜ Memory Limit Exceeded (MLE)
+- ⬜ Output Limit Exceeded (OLE)
+- ⬜ Automatic Workspace Cleanup
+- ⬜ PostgreSQL Integration
+- ⬜ Hidden Test Cases
+- ⬜ Submission Persistence
+- ⬜ Result Persistence
+- ⬜ Backend API Integration
 
 ---
 
-# 🛣 Roadmap
+# 🛣 Development Roadmap
 
-### Planned Features
+## Phase 1 — Core Judge ✅
 
-- JavaScript executor
-- Java support
-- Go support
-- Rust support
-- Memory Limit Exceeded (MLE)
-- Interactive problems
-- Custom checkers
-- Distributed judge workers
-- Parallel execution
-- Live verdict updates
-- Judge dashboard
-- Performance metrics
+- ✅ Docker Sandbox
+- ✅ BullMQ Worker
+- ✅ C++ Executor
+- ✅ Python Executor
+- ✅ Multiple Test Cases
+- ✅ Time Limit Exceeded
+
+---
+
+## Phase 2 — Judge Enhancements 🚧
+
+- ⬜ Memory Limit Exceeded
+- ⬜ Output Limit Exceeded
+- ⬜ Hidden Test Cases
+- ⬜ Automatic Workspace Cleanup
+- ⬜ Better Runtime Statistics
+- ⬜ Memory Usage Reporting
+
+---
+
+## Phase 3 — Backend
+
+- ⬜ PostgreSQL Integration
+- ⬜ Submission Storage
+- ⬜ Result Storage
+- ⬜ REST API
+- ⬜ Authentication
+- ⬜ Problem Management
+
+---
+
+## Phase 4 — Scaling
+
+- ⬜ JavaScript Executor
+- ⬜ Java Executor
+- ⬜ Go Executor
+- ⬜ Rust Executor
+- ⬜ Multiple Judge Workers
+- ⬜ Distributed Judge Cluster
+- ⬜ Live Verdict Updates
+- ⬜ Judge Dashboard
+- ⬜ Performance Monitoring
 
 ---
 
 # 🎯 Design Goals
 
-The project is designed with the following principles:
+The primary goals of CodeClash Judge are
 
 - Scalability
 - Security
 - Reliability
+- Performance
 - Maintainability
 - Extensibility
-- Performance
 
 ---
 
@@ -406,12 +363,20 @@ Contributions are welcome.
 
 If you'd like to contribute:
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Open a Pull Request.
+```bash
+# Fork the repository
 
-Bug reports, feature requests, and suggestions are always appreciated.
+# Create a new branch
+git checkout -b feature/my-feature
+
+# Commit changes
+git commit -m "Add new feature"
+
+# Push branch
+git push origin feature/my-feature
+```
+
+Then open a Pull Request.
 
 ---
 
@@ -427,10 +392,10 @@ This project is licensed under the **MIT License**.
 
 Software Engineering Student • Backend Developer • System Design Enthusiast
 
-Building **CodeClash** — a scalable online coding platform for competitive programming, technical interviews, and programming education.
+Building **CodeClash**, a modern online programming platform focused on competitive programming, technical interviews, and programming education.
 
 ---
 
 <p align="center">
-Made with ❤️ using Node.js, Docker, Redis, and BullMQ.
+Built with ❤️ using Node.js, Docker, Redis, BullMQ & Express.js
 </p>
