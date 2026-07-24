@@ -18,11 +18,16 @@ async function pythonJudge(workspace) {
             "-c",
             `
             set -e
-            python3 main.py < input.txt
+           timeout 2s python3 main.py < input.txt
             `
         ]
     );
-
+if (executionResult.exitCode === 124) {
+    return {
+        verdict: "TIME_LIMIT_EXCEEDED",
+        testCase: i + 1
+    };
+}
     // -----------------------------
     // Runtime Error
     // -----------------------------

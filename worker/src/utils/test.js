@@ -1,37 +1,40 @@
 const createWorkspace = require("./createworkspace");
 const saveCode = require("./savecode");
-const saveInput = require("./saveinput");
-const saveExpectedOutput = require("./saveexpectedoutput");
 
 const cppJudge = require("../judge/cppjudge");
-const pythonJudge = require("../judge/pythonjudge");
 
 (async () => {
 
     const job = await createWorkspace();
 
     const code = `
-a, b = map(int, input().split())
-print(a + b)
+#include<iostream>
+using namespace std;
+
+int main() {
+    int a,b;
+    cin >> a >> b;
+    cout << a + b;
+}
 `;
 
-    await saveCode(
-        job.workspace,
-        "python",
-        code
-    );
+    await saveCode(job.workspace, "cpp", code);
 
-    await saveInput(
-        job.workspace,
-        "10 20"
-    );
+    const testcases = [
+        {
+            input: "/home/spcai/Desktop/codeclash/worker/tests/input1.txt",
+            output: "/home/spcai/Desktop/codeclash/worker/tests/output1.txt"
+        },
+        {
+            input: "/home/spcai/Desktop/codeclash/worker/tests/input2.txt",
+            output: "/home/spcai/Desktop/codeclash/worker/tests/output2.txt"
+        }
+    ];
 
-    await saveExpectedOutput(
+    const verdict = await cppJudge(
         job.workspace,
-        "40"
+        testcases
     );
-
-    const verdict = await pythonJudge(job.workspace);
 
     console.log(verdict);
 
