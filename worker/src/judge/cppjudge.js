@@ -4,7 +4,8 @@ const path = require("path");
 const dockerRunner = require("../docker/dockerrunner");
 const readFile = require("../utils/readfile");
 const compareOutput = require("./compareoutput");
-const getVerdict = require("./verdict");
+
+const OUTPUT_LIMIT = 1024 * 1024; // 1 MB
 
 async function cppJudge(workspace, testcases) {
 
@@ -27,7 +28,6 @@ async function cppJudge(workspace, testcases) {
     if (compileResult.exitCode !== 0) {
         return {
             verdict: "COMPILATION_ERROR",
-            stdout: "",
             stderr: compileResult.stderr
         };
     }
@@ -39,13 +39,22 @@ async function cppJudge(workspace, testcases) {
 
         const testcase = testcases[i];
 
-        // Copy current testcase input into workspace/input.txt
+        // Copy input
         await fs.copyFile(
             testcase.input,
             path.join(workspace, "input.txt")
         );
 
-        // Execute program
+        // Remove previous outputs if they exist
+        await fs.rm(path.join(workspace, "output.txt"), {
+            force: true
+        });
+
+        await fs.rm(path.join(workspace, "error.txt"), {
+            force: true
+        });
+
+        // Execute
         const executionResult = await dockerRunner(
             "judge-cpp",
             workspace,
@@ -54,55 +63,93 @@ async function cppJudge(workspace, testcases) {
                 "-c",
                 `
                 set -e
-             timeout 2s ./main < input.txt
+                timeout 2s ./main < input.txt > output.txt 2> error.txt
                 `
             ]
         );
-if (executionResult.exitCode === 124) {
-    return {
-        verdict: "TIME_LIMIT_EXCEEDED",
-        testCase: i + 1
-    };
-}
-        // Runtime Error
-        if (executionResult.exitCode !== 0) {
+
+        // -------------------------
+        // Time Limit Exceeded
+        // -------------------------
+        console.log(executionResult)
+           const stats = await fs.stat(
+            path.join(workspace, "output.txt")
+        );
+
+        if (stats.size > OUTPUT_LIMIT) {
             return {
-                verdict: "RUNTIME_ERROR",
-                testCase: i + 1,
-                stdout: executionResult.stdout,
-                stderr: executionResult.stderr
+                verdict: "OUTPUT_LIMIT_EXCEEDED",
+                testCase: i + 1
+            };
+        }
+        
+        if (executionResult.exitCode === 124) {
+            return {
+                verdict: "TIME_LIMIT_EXCEEDED",
+                testCase: i + 1
             };
         }
 
-        if (executionResult.exitCode === 124) {
-    return {
-        verdict: "TIME_LIMIT_EXCEEDED",
-        testCase: i + 1
-    };
-}
+        // -------------------------
+        // Memory Limit Exceeded
+        // -------------------------
+        if (executionResult.exitCode === 137) {
+            return {
+                verdict: "MEMORY_LIMIT_EXCEEDED",
+                testCase: i + 1
+            };
+        }
 
-        // Read expected output
-        const expected = await readFile(testcase.output);
+        // -------------------------
+        // Runtime Error
+        // -------------------------
+        if (executionResult.exitCode !== 0) {
 
-        // Compare output
-        const accepted = compareOutput(
-            executionResult.stdout,
-            expected
+            let stderr = "";
+
+            try {
+                stderr = await readFile(
+                    path.join(workspace, "error.txt")
+                );
+            } catch {}
+
+            return {
+                verdict: "RUNTIME_ERROR",
+                testCase: i + 1,
+                stderr
+            };
+        }
+
+        // -------------------------
+        // Output Limit Exceeded
+        // -------------------------
+     
+
+        // -------------------------
+        // Compare Output
+        // -------------------------
+        const actual = await readFile(
+            path.join(workspace, "output.txt")
         );
+
+        const expected = await readFile(
+            testcase.output
+        );
+
+        const accepted = compareOutput(actual, expected);
 
         if (!accepted) {
             return {
                 verdict: "WRONG_ANSWER",
                 testCase: i + 1,
-                stdout: executionResult.stdout,
-                stderr: executionResult.stderr,
+                actual,
                 expected
             };
         }
     }
 
     // -------------------------
-    // All test cases passed
+    // Accepted
     // -------------------------
     return {
         verdict: "ACCEPTED"

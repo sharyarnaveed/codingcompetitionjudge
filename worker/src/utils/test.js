@@ -2,19 +2,19 @@ const createWorkspace = require("./createworkspace");
 const saveCode = require("./savecode");
 
 const cppJudge = require("../judge/cppjudge");
+const cleanupWorkspace = require("./cleanupworkspace");
 
 (async () => {
 
     const job = await createWorkspace();
 
     const code = `
-#include<iostream>
-using namespace std;
+#include <iostream>
 
 int main() {
-    int a,b;
-    cin >> a >> b;
-    cout << a + b;
+    while (true) {
+        std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    }
 }
 `;
 
@@ -31,11 +31,19 @@ int main() {
         }
     ];
 
-    const verdict = await cppJudge(
-        job.workspace,
-        testcases
-    );
-
-    console.log(verdict);
+    try {
+        const verdict = await cppJudge(
+            job.workspace,
+            testcases
+        );
+    
+        console.log(verdict);
+    } catch (error) {
+        console.log(error)
+    }
+    finally{
+        await cleanupWorkspace(job.workspace)
+    }
+    
 
 })();

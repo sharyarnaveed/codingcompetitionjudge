@@ -1,45 +1,40 @@
-const {spawn}=require("child_process")
+const { spawn } = require("child_process");
+
 const uid = process.getuid();
 const gid = process.getgid();
-function dockerRunner(image, workspace, command)
-{
-    return new Promise((resolve,reject)=>{
-       
-const docker = spawn("docker", [
-    "run",
-    "--rm",
 
-    "--user",
-    `${uid}:${gid}`,
+function dockerRunner(image, workspace, command, memoryLimit = "256m") {
+    return new Promise((resolve, reject) => {
 
-    "-v",
-    `${workspace}:/code`,
+        const docker = spawn("docker", [
+            "run",
+            "--rm",
 
-    image,
+            "--memory",
+            memoryLimit,
 
-    ...command
-]);
-         let stdout = "";
-        let stderr = "";
+            "--memory-swap",
+            memoryLimit,
 
-        docker.stdout.on("data", (data) => {
-            stdout += data.toString();
-        });
+            "--user",
+            `${uid}:${gid}`,
 
-        docker.stderr.on("data", (data) => {
-            stderr += data.toString();
-        });
+            "-v",
+            `${workspace}:/code`,
+
+            image,
+
+            ...command
+        ]);
 
         docker.on("close", (code) => {
             resolve({
-                exitCode: code,
-                stdout,
-                stderr,
+                exitCode: code
             });
         });
 
         docker.on("error", reject);
-    })
+    });
 }
 
 module.exports = dockerRunner;
